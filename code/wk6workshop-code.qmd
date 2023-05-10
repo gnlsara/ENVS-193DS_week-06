@@ -1,0 +1,45 @@
+---
+title: "code for wk6 workshop"
+format: html
+editor: visual
+author: "Sara Gonzalez"
+---
+
+# #Set-up 
+
+```{r package-set-up}
+library(tidyverse) # general usage
+library(here) # organization
+library(naniar) # missing data visualization
+
+install.packages("skimr") # quick glimpse of data
+install.packages("plotly")
+install.packages("magick")
+install.packages("NatParksPalettes")
+install.packages("wesanderson")
+install.packages("patchwork")
+```
+
+# \# load in the data
+
+```{r loading-data}
+# create new object called whales
+# read in whales data
+whales <- read_csv(
+  here("data", "Graywhale_watching_2007_2019.csv")
+  
+)
+```
+
+look at missing data
+
+```{r missing-data-visualization}
+gg_miss_var(whales)
+```
+
+use skimr package to quickly glimpse the data
+
+```{r glimpse-of-data-using-skimr}
+library(skimr)
+skim(whales)
+```
