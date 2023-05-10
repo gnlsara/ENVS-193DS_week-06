@@ -43,3 +43,61 @@ use skimr package to quickly glimpse the data
 library(skimr)
 skim(whales)
 ```
+
+# wrangling - clean up data !
+
+```{r whales-wrangling}
+whales_clean <- whales %>% 
+  # creating new columns for years and months
+  mutate(year_new = lubridate::year(date)) %>% 
+  mutate(month_new = lubridate::month(date)) %>% 
+  # create new column for month name
+  mutate(month_name = case_when(
+    month_new==2 ~ "February", 
+    month_new==3 ~ "March",
+    month_new==4 ~ "April",
+    month_new==5 ~ "May"
+  ), 
+  month_name = forcats::as_factor(month_name), 
+  month_name = forcats::fct_relevel(month_name, "February", "March", "April", "May")
+  
+  ) %>% 
+  mutate(condition_new = case_when(
+    stringr::str_detect(condition, "Excellent") ~ "excellent",
+    str_detect(condition, "Good") ~ "good",
+    str_detect(condition, "Fair") ~ "fair",
+    str_detect(condition, "Poor") ~ "poor"
+    ))
+```
+
+# create a plot and insert image using magick
+
+```{r whales-2019}
+library(magick)
+library(NatParksPalettes)
+library(wesanderson)
+# create new data frome to filter 2019 observations
+whales_2019 <- whales_clean %>% 
+  filter(year_new==2019)
+
+# read in whale png as raster
+whale_image <- magick::image_read(
+  here("images", "noaa-gray-whale.png")
+  
+) %>% 
+  as.raster()
+
+# make boxplot
+whales_2019_boxplot <- ggplot(data = whales_2019, aes(x = month_name, y = total)) +
+  geom_boxplot(aes(fill = month_name)) +
+  geom_point(position = position_jitter(width = 0.3, height = 0, seed = 1)) +
+  scale_fill_manual(values = natparks.pals("RockyMtn", 4))+
+  annotation_raster(whale_image, xmin = 2.5, xmax = 4.5, ymin = 30, ymax = 60)
+# seed is the way to make random number generator not so random. 
+whales_2019_boxplot
+```
+
+```{r interactive-plot}
+library(plotly)
+ggplotly(whales_2019_boxplot)
+```
